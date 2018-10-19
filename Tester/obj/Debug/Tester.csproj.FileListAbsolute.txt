@@ -1,0 +1,8 @@
+E:\Chess\Tester\bin\Debug\Tester.exe.config
+E:\Chess\Tester\bin\Debug\Tester.exe
+E:\Chess\Tester\bin\Debug\Tester.pdb
+E:\Chess\Tester\obj\Debug\Tester.exe
+E:\Chess\Tester\obj\Debug\Tester.pdb
+E:\Chess\Tester\bin\Debug\Chess.dll
+E:\Chess\Tester\bin\Debug\Chess.pdb
+E:\Chess\Tester\obj\Debug\Tester.csprojResolveAssemblyReference.cache
