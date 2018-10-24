@@ -2,6 +2,9 @@
 
 using Chess;
 
+
+// BM2;ABM;BIT64;
+
 namespace Tester
 {
     public class Program
@@ -14,8 +17,9 @@ namespace Tester
             Bitboard b = 12345656;
 
             Console.WriteLine (b.Notation);
+            Console.WriteLine (b.PopCount());
 
-            Console.WriteLine (Global.SlideAttacks (PieceType.BSHP, Square.D4, b).Notation);
+            Console.WriteLine (Global.Attacks (PieceType.BSHP, Square.D4, b).Notation);
 
             
 

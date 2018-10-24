@@ -4,19 +4,33 @@ using System.Diagnostics;
 namespace Chess
 {
     /// <summary>
-    /// 
+    /// XOR Shift64*(Star) Pseudo-Random Number Generator
+    /// Based on the original code design/written and dedicated
+    /// to the public domain by Sebastiano Vigna (2014)
+    ///
+    /// It has the following characteristics:
+    ///
+    ///  -  Outputs 64-bit numbers
+    ///  -  Passes Dieharder and SmallCrush test batteries
+    ///  -  Does not require warm-up, no zeroland to escape
+    ///  -  Internal state is a single 64-bit integer
+    ///  -  Period is 2^64 - 1
+    ///  -  Speed: 1.60 ns/call (Core i7 @3.40GHz)
+    ///
+    /// For further analysis see
+    ///   <http://vigna.di.unimi.it/ftp/papers/xorshift.pdf>
     /// </summary>
     public class PRNG
     {
         #region Fields
 
-        private UInt64 _Seed = 0;
+        private ulong _Seed = 0;
 
         #endregion
 
         #region Constructors
 
-        public PRNG (UInt64 seed)
+        public PRNG (ulong seed)
         {
             Debug.Assert (seed != 0);
             _Seed = seed;
@@ -26,7 +40,7 @@ namespace Chess
 
         #region Methods
 
-        private UInt64 Rand64 ()
+        private ulong Rand64 ()
         {
             _Seed ^= _Seed >> 12;
             _Seed ^= _Seed << 25;

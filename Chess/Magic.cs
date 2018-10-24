@@ -19,7 +19,13 @@ namespace Chess
         public ushort Index (Bitboard occ)
         {
 #       if !BM2
+#           if BIT64
             return (ushort)(((occ & Mask) * Number) >> Shift);
+#           else
+            var lo = ((uint)(occ >> 0x00) & (uint)(Mask >> 0x00)) * (uint)(Number >> 0x00);
+            var hi = ((uint)(occ >> 0x20) & (uint)(Mask >> 0x20)) * (uint)(Number >> 0x20);
+            return (ushort)((lo ^ hi) >> Shift);
+#           endif
 #       else
             return 0;
 #       endif

@@ -50,6 +50,7 @@
     <Compile Include="MoveType.cs" />
     <Compile Include="Piece.cs" />
     <Compile Include="PieceType.cs" />
+    <Compile Include="Position.cs" />
     <Compile Include="PRNG.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rank.cs" />

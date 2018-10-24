@@ -334,10 +334,10 @@ namespace Chess
         public static void Init ()
         {
             BMagics = new Magic[Square.Max];
-            InitializeTable (PieceType.BSHP, BMagics);
+            InitializeMagic (PieceType.BSHP, BMagics);
 
             RMagics = new Magic[Square.Max];
-            InitializeTable (PieceType.ROOK, RMagics);
+            InitializeMagic (PieceType.ROOK, RMagics);
         }
 
         public static Bitboard Square_bb (Square s) { Debug.Assert (s.Ok); return _Square_bb[s]; }
@@ -364,7 +364,7 @@ namespace Chess
         public static Bitboard PawnAttacks (Color c, Square s) { Debug.Assert (s.Ok); return _PawnAttacks[c, s]; }
         public static Bitboard PieceAttacks (PieceType pt, Square s) { Debug.Assert (PieceType.PAWN < pt && pt <= PieceType.KING); Debug.Assert (s.Ok); return _PieceAttacks[pt, s]; }
 
-#if !ABM
+#   if !ABM
         // PopCount_16() counts the non-zero bits using SWAR-Popcount algorithm
         public static byte PopCount_16 (UInt32 u)
         {
@@ -373,7 +373,7 @@ namespace Chess
             u = ((u >> 4) + u) & 0x0F0FU;
             return (byte)((u * 0x0101U) >> 8);
         }
-#endif
+#   endif
 
         public static Bitboard SlideAttacks (PieceType pt, Square s, Bitboard occ)
         {
@@ -396,7 +396,7 @@ namespace Chess
             return SlideAttacks (pt, s, 0);
         }
 
-        private static void InitializeTable (PieceType pt, Magic[] magics)
+        private static void InitializeMagic (PieceType pt, Magic[] magics)
         {
 
 #       if !BM2
@@ -413,11 +413,10 @@ namespace Chess
 
 #       endif
 
-            // attacksBB[s] is a pointer to the beginning of the attacks table for square 's'
-            //var totalSize = 0U;
+            var offset = 0U;
+            
             for (var s = Square.A1; s <= Square.H8; ++s)
             {
-
                 var magic = magics[s] = new Magic();
 
                 // Given a square 's', the mask is the bitboard of sliding attacks from 's'
@@ -429,8 +428,9 @@ namespace Chess
                             // Board edges are not considered in the relevant occupancies
                            & ~(((FA_bb | FH_bb) & ~File_bb (s)) | ((R1_bb | R8_bb) & ~Rank_bb (s)));
 
+                // magic.Attacks is a pointer to the beginning of the attacks table for square 's'
                 var maskPopCount = magic.Mask.PopCount ();
-                magic.Attacks = new Bitboard[(int)Math.Pow (2, maskPopCount)];
+                magic.Attacks = new Bitboard[(uint)Math.Pow (2, maskPopCount)];
 
 #           if !BM2
                 magic.Shift = (byte)(
@@ -442,29 +442,34 @@ namespace Chess
                     - maskPopCount);
 #           endif
 
-
                 // Use Carry-Rippler trick to enumerate all subsets of masksBB[s] and
                 // store the corresponding sliding attack bitboard in reference[].
-                var size = 0U;
+                
                 Bitboard occ = 0;
+
+#           if !BM2
+                var size = 0U;
+#           endif
 
                 do
                 {
 #               if BM2
-                    attacksBB[s][PEXT(occ, masksBB[s])] = sliding_attacks (deltas, s, occ);
+                    magic.Attacks[PEXT(occ, magic.Mask)] = sliding_attacks (deltas, s, occ);
 #               else
                     occupancy[size] = occ;
                     reference[size] = SlideAttacks (pt, s, occ);
+                    ++size;
 #               endif
                     
-                    ++size;
                     occ = (occ - magic.Mask) & magic.Mask;
-                } while (occ != 0);
-
+                } while (0 != occ);
 
 #           if !BM2
+
+                Debug.Assert (size == (uint)Math.Pow (2, maskPopCount));
+
                 var prng = new PRNG (Seeds[s.Rank]);
-                var i = 0U;
+                uint i;
 
                 // Find a magic for square 's' picking up an (almost) random number
                 // until found the one that passes the verification test.
@@ -498,8 +503,8 @@ namespace Chess
 
                 } while (i < size);
 #           endif
-                //totalSize += size;
 
+                offset += (uint)Math.Pow (2, maskPopCount);
             }
 
 

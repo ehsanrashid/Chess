@@ -9,25 +9,27 @@ namespace Chess
     public class Bitboard
     {
 
+#   if !ABM
         [StructLayout (LayoutKind.Explicit)]
         public class Slice
         {
             [FieldOffset (0)]
-            public Bitboard b;
+            public ulong b;
             [FieldOffset (0)]
+            [MarshalAs (UnmanagedType.ByValArray, SizeConst = 4)]
             public ushort[] u16 = new ushort[4];
         };
+#   endif
 
 
-
-        #region Fields
+#region Fields
 
         private ulong _Value;
 
-        #endregion
+#endregion
 
 
-        #region Properties
+#region Properties
 
         public string Notation
         {
@@ -67,22 +69,21 @@ namespace Chess
             }
         }
 
-        #endregion
+#endregion
 
-        #region Constructors
+#region Constructors
 
         private Bitboard (ulong value = 0)
         {
             _Value = value;
         }
 
-        #endregion
+#endregion
 
 
-        #region Methods
+#region Methods
 
-
-        #region Static
+#region Static
 
         public static implicit operator Bitboard (ulong value) { return new Bitboard (value); }
         public static implicit operator ulong (Bitboard bb) { return bb._Value; }
@@ -117,8 +118,7 @@ namespace Chess
             return !(bb1 == bb2);
         }
 
-        #endregion
-
+#endregion
 
         public bool Contains (Square s) { Debug.Assert (s.Ok); return 0 != (this & Global.Square_bb (s)); }
 
@@ -157,6 +157,7 @@ namespace Chess
         {
 #       if !ABM
             var s = new Slice { b = this };
+
             return (byte)(Global.PopCount16[s.u16[0]]
                         + Global.PopCount16[s.u16[1]]
                         + Global.PopCount16[s.u16[2]]
@@ -169,7 +170,7 @@ namespace Chess
 #       endif
         }
 
-        #region Override
+#region Override
 
         public override bool Equals (object obj)
         {
@@ -186,9 +187,9 @@ namespace Chess
             return _Value.ToString ();
         }
 
-        #endregion
+#endregion
 
-        #endregion
+#endregion
 
     }
 }
